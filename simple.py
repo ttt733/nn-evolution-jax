@@ -14,7 +14,7 @@ flags.DEFINE_float(
     'init_scale', .3, 'The maximum (absolute) value of a weight/bias parameter at initialization')
 
 # Training task parameters
-flags.DEFINE_integer('epochs', 8000, 'Number of epochs to run training for')
+flags.DEFINE_integer('epochs', 10000, 'Number of epochs to run training for')
 flags.DEFINE_integer('batch_size', 64, 'Train batch size')
 flags.DEFINE_integer('sequence_length', 8,
                      'Sequence length to give the network')
