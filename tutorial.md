@@ -17,6 +17,8 @@ The code here owes a lot to the code OpenAI published alongside their blog. If y
 
 # simple.py
 
+[Click here](https://github.com/ttt733/nn-evolution-jax/blob/main/simple.py) to view the code.
+
 ---
 
 ## Creating a problem to solve
@@ -158,6 +160,8 @@ This view of the network's performance isn't particularly exhaustive, and for a 
 
 # advanced.py
 
+[Click here](https://github.com/ttt733/nn-evolution-jax/blob/main/advanced.py) to view the code.
+
 ---
 
 ## Optimizing our training
@@ -271,6 +275,8 @@ With the Adam optimizer, we see better average error at the end, but we see that
 That's more than enough optimization, for this problem. Let's take a look at the main draw of these evolution strategies: running on many GPUs, TPUs, or CPUs in parallel.
 
 # parallel.py
+
+[Click here](https://github.com/ttt733/nn-evolution-jax/blob/main/parallel.py) to view the code.
 
 ---
 
