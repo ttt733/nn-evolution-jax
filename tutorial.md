@@ -22,7 +22,7 @@ The code here owes a lot to the code OpenAI published alongside their blog. If y
 ---
 
 ## Creating a problem to solve
-When I want a simple problem for a network to solve, my go-to is making it learn the sine function. I decided to mix things up just a little this time, though, by framing it as a sequence prediction problem. Given the last few Y values of a sine wave at regularly-spaced intervals, predict the next one - that's our network's task.
+When I want a simple problem for a network to solve, my go-to is making it learn the sine function. I decided to mix things up just a little this time, though, by framing it as a sequence prediction problem. Given the last few Y values on the plot of a sine wave at regularly-spaced intervals, predict the next one - that's our network's task.
 
 In JAX, it usually helps to think of things in terms of arrays of known shapes. Things like for loops are implicitly discouraged in code that's going to run often, because they slow its magical math optimization down. You might think of getting the previous four Y values by doing something like this:
 ```
