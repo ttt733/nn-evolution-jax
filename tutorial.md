@@ -42,7 +42,7 @@ previous_ys = jnp.sin(target_x - sequence_offset)
 It takes some getting used to, but the payoff we get from XLA optimizations in return is massive. If you want to see the actual code I use for this, check the get_next function in any of the scripts in the repo. You can see that I also inject a tiny bit of noise into the "observations" (the previous_ys) in order to make the problem a little harder for the network.
 
 ## Setting up our network
-Lately I've been a fan of haiku, DeepMind's library for defining neural networks in JAX. (Being familiar with it makes the code DeepMind publishes easier to navigate, so it's nice to know.) Our network and our reward function for this problem don't need too much architecting.
+Lately I've been a fan of [haiku](https://dm-haiku.readthedocs.io/en/latest/), DeepMind's library for defining neural networks in JAX. (Being familiar with it makes the code DeepMind publishes easier to navigate, so it's nice to know.) Our network and our reward function for this problem don't need too much architecting.
 ```
 import haiku as hk
 import jax
