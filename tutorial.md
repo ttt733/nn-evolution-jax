@@ -152,7 +152,7 @@ flat_params, _ = jax.lax.scan(run_epoch, flat_params, rng)
 
 With all of that - plus a couple calls to initialize the haiku network, which you can see at the top of the main functions in the repo - we're ready to go. I'll add some simple logging (including the largest and smallest parameter values in our network, for reasons I'll explain below.) Here are the results.
 
-https://i.imgur.com/TaE6KEy.png
+<img src="https://i.imgur.com/TaE6KEy.png">
 
 This view of the network's performance isn't particularly exhaustive, and for a more complex problem you'd want to validate them with aditional metrics (and visualizations, if at all possible) showing the progress and results of training. For our toy sine wave problem, though, we can at least look at them and see that the network's improved.
 
@@ -214,7 +214,8 @@ def get_scaled_noise(reward_out, noise_out):
 ```
 
 Our updated results:
-https://i.imgur.com/w1m9I46.png
+
+<img src="https://i.imgur.com/w1m9I46.png">
 
 ## Weight Decay
 
@@ -234,7 +235,7 @@ def reward_fn(forward_fn,
 reward = reward_fn(fwd_fn_apply, test_params, rng,
                            obs, targets, jnp.sum(jnp.absolute(noised_params)))
 ```
-https://i.imgur.com/rXVxOsV.png
+<img src="https://i.imgur.com/rXVxOsV.png">
 
 We can see that the network's total weight is not changing much, now, and since the highest and lowest parameters aren't too big, we can be pretty sure that our updates are still having an impact. How you want to implement weight decay depends a lot on what your network's initial parameters are and what your reward function looks like, and is something that can be toyed with if you feel like your training goes off the rails.
 
@@ -262,7 +263,8 @@ scaled_noise = get_scaled_noise(reward_out, noise_out)
 scaled_noise, adam_state = adam_update(-scaled_noise + .005 * flat_params, adam_state)
 return (flat_params + scaled_noise, adam_state), None
 ```
-https://i.imgur.com/p0M0sOj.png
+
+<img src="https://i.imgur.com/p0M0sOj.png">
 
 With the Adam optimizer, we see better average error at the end, but we see that the network's parameters also managed to grow significantly despite our weight decay scaling. Its adaptive learning rate probably allowed it to "overcome" the weight decay with better overall performance. 
 
@@ -361,7 +363,9 @@ Now, we can chop our update calculations up as much as we need to in order to fi
 
 ### Results
 Let's do a quick sanity check and make sure we didn't ruin our results.
-https://i.imgur.com/VHN5pPJ.png
+
+<img src="https://i.imgur.com/VHN5pPJ.png">
+
 Performance is a little worse, which is to be expected when batching updates, and it's still within an acceptable range for this problem. (Given the jittering we do on the input data, some error is to be expected.) But what's more interesting is the fact that the network's total weight shrank significantly. Batching out our update calculations seems to allow the weight decay to really impact the network - so much so that we might get worried that it's getting too small.
 
 There are some things we could try to fix it, but weight decay calculations are something that will need to be tailored to any target application. It's part of the reward function, after all. We can see in the output that none of the parameters have grown too out of control, so in this case, we probably don't need to worry about it. In a more complex application, you'd want to look at it with a little more scrutiny, to make sure it isn't cutting the time during which your network can learn efficiently short.
