@@ -4,7 +4,7 @@ In 2017, OpenAI published [a paper](https://arxiv.org/abs/1703.03864) and [a blo
 
 Evolution strategies, in this context, don't refer to genetic algorithms, or to anything closely resembling real-world evolutionary mechanics. The strategies they use simply take a network's parameters and try lots of little variations of it to see which do the best. The parameters are updated to be more like the best performers, and then the process repeats.
 
-This is posed as an alternative to reinforcement learning, where some unintuitive (and incredibly clever) methods are often required to model a task in a way that a network can learn to accomplish it through backpropogation. And it does have some advantages - the "brute force" trial and error of evolution is often easier to understand than the training of careful RL algorithms. This repository shows an implementation of that idea, using JAX's vectorization and parallelization capabilities in order to efficiently run large populations.
+This is posed as an alternative to reinforcement learning, where some unintuitive (and incredibly clever) methods are often required to model a task in a way that a network can learn to accomplish it through backpropogation. And it does have some advantages - the "brute force" trial and error of evolution is often easier to understand than the training of careful RL algorithms. This repository shows an implementation of that idea, using [JAX's](https://jax.readthedocs.io/en/latest/) vectorization and parallelization capabilities in order to efficiently run large populations.
 
 ### Aside: More History / Rationale
 Evolution hasn't really "won" over RL in practice. Later that same year, AlphaZero was published, showcasing the fact that RL's complexities hadn't yet been pushed to their limits - that, given an environment it can simulate (such as a chessboard), it can learn not just how to act based on observations, but how to *plan* based on them. The documentary film Artificial Gamer follows the Open AI team that developed OpenAI Five, a neural network capable of playing Dota 2 at the highest level. In that film, they mention that the evolution strategies they researched were considered for training that network, but even they decided to stick with the approach of throwing an incredible number of GPUs and CPUs at traditional RL.
@@ -112,7 +112,7 @@ def run_member(rng, base_params, obs, targets):
 
 We call our network inputs "obs" (for observations, as in RL), and targets are what we want our network to output. In other problems that might be solved with evolution or reinforcement learning, you might not have such easy targets, and your reward would need to come from an environment. But, for this simple problem, we have both at hand. The function outputs the noise that's unique to an individual member and the reward it achieved by applying that noise.
 
-Next up, we need to run the whole population over the same batch of data. (I'll call it an "epoch." Traditionally, in genetic algorithms, you'd call it a "generation," since after it's done the population is born anew. But neural networks these days are doing generative tasks, so the word risks getting a bit overloaded.) Since the only thing distinguishing members of the population is the RNG that generates their noise, we can just generate the RNG values and then vectorize over an array of them. It sounds complex, but JAX makes it pretty easy.
+Next up, we need to run the whole population over the same batch of data. (I'll call it an "epoch." Traditionally, in genetic algorithms, you'd call it a "generation," since after it's done the population is born anew. But neural networks these days are doing generative tasks, so the word risks getting a bit overloaded.) Since the only thing distinguishing members of the population is the RNG that generates their noise, we can just generate the RNG values and then vectorize over an array of them. It sounds complex, but JAX's [vmap](https://jax.readthedocs.io/en/latest/jax.html?#jax.vmap) function makes it pretty easy.
 
 ```
 def run_epoch(flat_params, rng):
@@ -144,9 +144,9 @@ def get_scaled_noise(reward_out, noise_out):
     return jnp.squeeze(scaled_noise)
 ```
 
-Now, you might think we're ready to go, with a "for _ in range(max_epochs):" - but remember, JAX doesn't like for loops. Specifically, it doesn't like things that conditionally change the flow of a program. It wants to know what it'll be doing on the GPUs ahead of time, so it doesn't have to ask the CPU if it should still be doing them every iteration.
+Now, you might think we're ready to go, with a `for _ in range(max_epochs):` - but remember, JAX doesn't like for loops. Specifically, it doesn't like things that conditionally change the flow of a program. It wants to know what it'll be doing on the GPUs ahead of time, so it doesn't have to ask the CPU if it should still be doing them every iteration.
 
-Fortunately, JAX provides a scan function that allows us to do the same sort of thing. I won't get into it too much, as their docs already explain it, but scan can operate a lot like a reduce function. It takes a function and an array of data, and it iterates over the array, passing its value and maintaining some "carry" value between calls. We'll use that carry value to keep track of our network's parameters, and we'll iterate over the RNG seed we want to use for each epoch. And all of what I just explained gets summed up in a couple lines of code.
+Fortunately, JAX provides a [scan](https://jax.readthedocs.io/en/latest/_autosummary/jax.lax.scan.html) function that allows us to do the same sort of thing. I won't get into it too much, as their docs already explain it, but scan can operate a lot like a reduce function. It takes a function and an array of data, and it iterates over the array, passing its value and maintaining some "carry" value between calls. We'll use that carry value to keep track of our network's parameters, and we'll iterate over the RNG seed we want to use for each epoch. And all of what I just explained gets summed up in a couple lines of code.
 ```
 rng = jax.random.split(rng, epochs)
 flat_params, _ = jax.lax.scan(run_epoch, flat_params, rng)
@@ -280,7 +280,7 @@ That's more than enough optimization, for this problem. Let's take a look at the
 
 ---
 
-One of the benefits of JAX is that parallelizing functions written for one device can be pretty easy. Right now, vmap is parallelizing our code on a single GPU. We'd like to be able to scale up, though, and for that we'll need its analagous method, pmap. We can get how many devices we're working with by using the following code:
+One of the benefits of JAX is that parallelizing functions written for one device can be pretty easy. Right now, vmap is parallelizing our code on a single GPU. We'd like to be able to scale up, though, and for that we'll need its analagous method, [pmap](https://jax.readthedocs.io/en/latest/jax.html?#jax.pmap). We can get how many devices we're working with by using the following code:
 ```
 ndevices = jax.local_device_count()
 assert npop % ndevices == 0
