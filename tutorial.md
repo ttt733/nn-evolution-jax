@@ -85,6 +85,9 @@ Since we're updating the network's parameters directly, rather than letting auto
 ```
 from jax.flatten_util import ravel_pytree
 
+# We get our parameters from haiku's network initialization function
+params = fwd_fn.init(subkey, obs)
+
 # After network initialization...
 # unravel_params is a function that takes a "flat" 1D array representing our parameters and turns it
 # into a useful pytree dictionary object
